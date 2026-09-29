@@ -32,10 +32,44 @@ class EventEmitter {
     };
 };
 
-const e = new EventEmitter();
+class Logger extends EventEmitter {
+    constructor(name) {
+        super();
+        this.name = name;
+    }
 
-e.once("greet", () => console.log("Hello, Ben"));
-// e.once("greet", () => console.log("Welcome"));
+    log(level, message) {
+        const entry = {
+            level,
+            message,
+            source: this.name,
+            time: new Date().toString(),
+        };
+        console.log(`[${entry.level}] ${entry.message}`);
+        this.emit("log", entry)
+        this.emit(level, entry)
+    }
 
-e.emit("greet");
-e.emit("greet");
+    info(msg) { this.log("info", msg); }
+    warn(msg) { this.log("warn", msg); }
+    error(msg) { this.log("error", msg); }
+}
+
+// const e = new EventEmitter();
+
+// e.once("greet", () => console.log("Hello, Ben"));
+// // e.once("greet", () => console.log("Welcome"));
+
+// e.emit("greet");
+// e.emit("greet");
+
+const logger = new Logger("api");
+
+logger.on("error", (e) => {
+    console.log("ALERT", e.message);
+});
+
+logger.once("log", () => console.log("first log ever"));
+
+logger.info("Server started");
+logger.error("DB connection failed")
